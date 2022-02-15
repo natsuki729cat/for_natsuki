@@ -1,0 +1,52 @@
+##フィッティングに使うもの
+from scipy.optimize import curve_fit
+import numpy as np
+
+## 図示のために使うもの
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# データ生成
+csv1 = pd.read_csv('./20220207_RuIII_Rubdapic2_CoPOM_Co2POM_0095.CSV', index_col=0, header=None)
+csv1 = csv1.T
+csv1 = csv1.iloc[range(445), :] 
+x1 = csv1[csv1.keys()[0]]
+y1 = csv1[csv1.keys()[205]]
+
+#最小二乗計算
+param_ini = (1.1, -0.69, 0.9, -0.36, 4)
+def nonlinear_fit(x,a,b,c,d,e):
+    return  a + b * np.exp((-c )* x)+ d * np.exp((-e )* x)
+
+param, cov = curve_fit(nonlinear_fit, x1, y1)
+
+list_y = []
+for num in x1:
+    list_y.append( param[0] + param[1] * np.exp((-param[2] )* num)+ param[3] * np.exp((-param[4] )* num))
+
+#決定係数の算出
+residuals =  y1 - nonlinear_fit(x1, param[0],param[1], param[2],param[3], param[4])
+rss = np.sum(residuals**2)#residual sum of squares = rss
+tss = np.sum((y1-np.mean(y1))**2)#total sum of squares = tss
+r_squared = 1 - (rss / tss)
+
+# Figureの初期化
+fig = plt.figure(figsize=(12, 8)) #...1
+
+# Figure内にAxesを追加()
+ax = fig.add_subplot(1, 1, 1) #...2
+ax.scatter(x1, y1, label="0090",color="r", ls=":", marker="o"	) #...3
+ax.scatter(x1, y=np.array(list_y), label="0090",color="b", ls=":", marker="v"	) #...3
+
+# 凡例の表示
+plt.legend()
+
+# 軸範囲の設定
+ax.set_xlim(0, 5)
+ax.set_ylim(-0.1, 1.4)
+
+# プロット表示(設定の反映)
+plt.show()
+print(param)
+print(r_squared)
