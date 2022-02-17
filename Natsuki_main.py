@@ -37,7 +37,7 @@ def MakeGraph(x,y):
 # pythonファイルがあるディレクトリから、末尾が4桁の数字で拡張子がcsvのファイルをすべて持ってくる
 #サブディレクトリは探さない
 list = glob.glob('*[0-9][0-9][0-9][0-9].csv') 
-
+counter = 0
 for file in list: #該当するcsvデータ全てに以下の処理を繰り返す
 
     print(file) #実行前にファイル名確認
@@ -53,3 +53,13 @@ for file in list: #該当するcsvデータ全てに以下の処理を繰り返�
     MakeGraph(x1,y1)
 
     array.to_csv(file[:-4]+'_453nm.txt', header=False, index=False) #x軸y軸の配列を出力
+    
+    if counter == 0:
+        arrayall = array
+        counter= counter + 1
+    elif counter > 0:
+        arrayall = pd.concat([arrayall,y1],axis=1)
+        counter= counter + 1
+
+# 全データの出力 
+arrayall.to_csv(file[:-9]+'_453nm_all.txt', header=False, index=False)
